@@ -84,7 +84,7 @@ export default function LandingPage() {
                 <button
                   id="nav-go-drive"
                   className="btn btn-secondary"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/dashboard')}
                 >
                   Open My Drive <ArrowRight size={15} />
                 </button>
@@ -132,7 +132,7 @@ export default function LandingPage() {
 
         <div className="hero-actions">
           {isLoggedIn ? (
-            <button className="btn btn-primary hero-btn" onClick={() => navigate('/')} id="hero-go-drive">
+            <button className="btn btn-primary hero-btn" onClick={() => navigate('/dashboard')} id="hero-go-drive">
               Open My Drive <ArrowRight size={17} />
             </button>
           ) : (
