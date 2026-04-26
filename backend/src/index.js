@@ -12,10 +12,7 @@ const app = express();
 
 // ✅ CORS configuration (local + deployed frontend)
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://dobby-assignment.vercel.app'
-  ],
+  origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 
