@@ -256,7 +256,7 @@ export default function LandingPage() {
         <h2 className="cta-title">Your media. Private. Organised.</h2>
         <p className="cta-sub">Create an account and start uploading in under a minute.</p>
         {isLoggedIn ? (
-          <button className="btn btn-primary hero-btn" onClick={() => navigate('/')} id="cta-drive">
+          <button className="btn btn-primary hero-btn" onClick={() => navigate('/dashboard')} id="cta-drive">
             Open My Drive <ArrowRight size={17} />
           </button>
         ) : (
