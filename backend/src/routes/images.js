@@ -1,15 +1,14 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 const Image = require('../models/Image');
 const Folder = require('../models/Folder');
 const { protect } = require('../middleware/auth');
 const upload = require('../utils/upload');
+const cloudinary = require('../config/cloudinary');
 
 const router = express.Router();
 
-// POST /api/images — upload an image to a folder
+// POST /api/images — upload image
 router.post(
   '/',
   protect,
@@ -18,43 +17,36 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // Clean up uploaded file if validation fails
-      if (req.file) fs.unlinkSync(req.file.path);
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Image file is required.' });
+      return res.status(400).json({
+        success: false,
+        message: 'Image file is required.',
+      });
     }
 
     try {
       const { name, folder: folderId } = req.body;
 
-      if (!folderId) {
-        fs.unlinkSync(req.file.path);
-        return res
-          .status(400)
-          .json({ success: false, message: 'Folder ID is required.' });
-      }
-
-      // Verify folder belongs to owner
+      // Verify folder belongs to user
       const folder = await Folder.findOne({
         _id: folderId,
         owner: req.user._id,
       });
+
       if (!folder) {
-        fs.unlinkSync(req.file.path);
-        return res
-          .status(404)
-          .json({ success: false, message: 'Folder not found.' });
+        return res.status(404).json({
+          success: false,
+          message: 'Folder not found.',
+        });
       }
 
       const image = await Image.create({
         name,
-        filename: req.file.filename,
-        mimetype: req.file.mimetype,
+        url: req.file.path,         // Cloudinary URL
+        public_id: req.file.filename,
         size: req.file.size,
         folder: folderId,
         owner: req.user._id,
@@ -62,15 +54,12 @@ router.post(
 
       res.status(201).json({ success: true, image });
     } catch (err) {
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       res.status(500).json({ success: false, message: err.message });
     }
   }
 );
 
-// DELETE /api/images/:id — delete an image
+// DELETE /api/images/:id
 router.delete('/:id', protect, async (req, res) => {
   try {
     const image = await Image.findOne({
@@ -79,15 +68,23 @@ router.delete('/:id', protect, async (req, res) => {
     });
 
     if (!image) {
-      return res.status(404).json({ success: false, message: 'Image not found.' });
+      return res.status(404).json({
+        success: false,
+        message: 'Image not found.',
+      });
     }
 
-    const filePath = path.join(__dirname, '../../uploads', image.filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    // Delete from Cloudinary
+    if (image.public_id) {
+      await cloudinary.uploader.destroy(image.public_id);
+    }
 
     await Image.deleteOne({ _id: image._id });
 
-    res.json({ success: true, message: 'Image deleted successfully.' });
+    res.json({
+      success: true,
+      message: 'Image deleted successfully.',
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
