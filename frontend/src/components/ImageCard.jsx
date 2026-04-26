@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Eye, ZoomIn } from 'lucide-react';
+import { Trash2, ZoomIn } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -30,7 +30,10 @@ export default function ImageCard({ image, onDeleted }) {
     }
   };
 
-  const imgSrc = `/uploads/${image.filename}`;
+  // ✅ FIXED IMAGE SOURCE (Cloudinary + fallback)
+  const imgSrc =
+    image.url ||
+    `https://dobby-assignment-qeyw.onrender.com/uploads/${image.filename}`;
 
   return (
     <>
@@ -41,6 +44,7 @@ export default function ImageCard({ image, onDeleted }) {
           className="image-thumb"
           loading="lazy"
         />
+
         <div className="image-overlay">
           <button
             className="btn btn-secondary btn-sm"
@@ -49,6 +53,7 @@ export default function ImageCard({ image, onDeleted }) {
           >
             <ZoomIn size={14} /> View
           </button>
+
           <button
             id={`delete-image-${image._id}`}
             className="btn btn-danger btn-sm"
@@ -56,11 +61,20 @@ export default function ImageCard({ image, onDeleted }) {
             disabled={deleting}
             style={{ gap: 6, marginLeft: 6 }}
           >
-            {deleting ? <span className="spinner" style={{ width: 12, height: 12 }} /> : <><Trash2 size={12} /> Delete</>}
+            {deleting ? (
+              <span className="spinner" style={{ width: 12, height: 12 }} />
+            ) : (
+              <>
+                <Trash2 size={12} /> Delete
+              </>
+            )}
           </button>
         </div>
+
         <div className="image-info">
-          <span className="image-name" title={image.name}>{image.name}</span>
+          <span className="image-name" title={image.name}>
+            {image.name}
+          </span>
           <span className="image-size">{formatBytes(image.size)}</span>
         </div>
       </div>
@@ -72,13 +86,31 @@ export default function ImageCard({ image, onDeleted }) {
           onClick={() => setLightbox(false)}
           style={{ alignItems: 'center' }}
         >
-          <div style={{ maxWidth: '90vw', maxHeight: '90vh', position: 'relative' }}>
+          <div
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              position: 'relative',
+            }}
+          >
             <img
               src={imgSrc}
               alt={image.name}
-              style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: 'var(--radius-lg)', display: 'block' }}
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                borderRadius: 'var(--radius-lg)',
+                display: 'block',
+              }}
             />
-            <div style={{ textAlign: 'center', marginTop: 12, color: '#fff', fontWeight: 600 }}>
+            <div
+              style={{
+                textAlign: 'center',
+                marginTop: 12,
+                color: '#fff',
+                fontWeight: 600,
+              }}
+            >
               {image.name}
             </div>
           </div>
