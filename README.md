@@ -1,17 +1,29 @@
 # Dobby Ads — Media Drive
 
-A full-stack Google Drive–style media manager built with Node.js, React, and MongoDB.
+> **Full-stack media management app** built for the Dobby Ads developer assignment.
+
+🌐 **Live Frontend:** [https://dobby-assignment.vercel.app](https://dobby-assignment.vercel.app)
+⚙️ **Live Backend:** [https://dobby-assignment-qeyw.onrender.com](https://dobby-assignment-qeyw.onrender.com)
+
+---
+
+## Overview
+
+Dobby Ads is a Google Drive–style media manager where users can register, create unlimited nested folders, and upload images — all in a private, user-specific workspace. Built with Node.js, React, and MongoDB, with Cloudinary for image storage and an MCP server bonus for Claude Desktop integration.
+
+---
 
 ## Features
 
-- ✅ Signup / Login / Logout (JWT auth, no Firebase)
-- ✅ Create nested folders (unlimited depth)
-- ✅ Folder size: recursive sum of all images including nested folders
-- ✅ Upload images (name + file required)
-- ✅ User-specific access — users only see their own folders/images
-- ✅ Image lightbox viewer
-- ✅ Drag-and-drop image upload
-- 🤖 **Bonus:** MCP server for Claude Desktop integration
+| Feature | Description |
+|---------|-------------|
+| 🔐 **Signup / Login / Logout** | JWT authentication with bcrypt password hashing (no Firebase) |
+| 📁 **Nested Folders** | Create folders inside folders to any depth, just like Google Drive |
+| 📦 **Folder Size** | Each folder shows its total size — recursively summed from all images at any nesting level |
+| 🖼️ **Image Upload** | Upload images with a custom name; stored securely on Cloudinary |
+| 🔒 **User-Specific Access** | Users only ever see their own folders and images |
+| 🏠 **Landing Page** | Public marketing page with hero, features, how-it-works, MCP callout, and CTA |
+| 🤖 **MCP Server (Bonus)** | Claude Desktop integration via MCP tools |
 
 ---
 
@@ -19,135 +31,247 @@ A full-stack Google Drive–style media manager built with Node.js, React, and M
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Node.js + Express |
-| Frontend | React (Vite) |
-| Database | MongoDB (Mongoose) |
-| Auth | JWT + bcrypt |
-| File storage | Multer (local `uploads/`) |
-| MCP | `@modelcontextprotocol/sdk` |
+| **Backend** | Node.js + Express |
+| **Frontend** | React (Vite) |
+| **Database** | MongoDB (Mongoose) |
+| **Authentication** | JWT + bcrypt |
+| **Image Storage** | Cloudinary |
+| **MCP** | `@modelcontextprotocol/sdk` |
+| **Frontend Host** | Vercel |
+| **Backend Host** | Render |
 
 ---
 
-## Getting Started
+## Live Demo
 
-### Prerequisites
+### 🌐 Frontend — Vercel
+**[https://dobby-assignment.vercel.app](https://dobby-assignment.vercel.app)**
 
-- Node.js 18+
-- MongoDB running locally on port 27017
+- Visit `/home` for the public landing page
+- Sign up or log in to access your personal drive
+- Create nested folders, upload images, manage your media
 
-### 1. Backend
+### ⚙️ Backend API — Render
+**[https://dobby-assignment-qeyw.onrender.com](https://dobby-assignment-qeyw.onrender.com)**
 
-```bash
-cd backend
-npm install
-# Edit .env if needed (MONGO_URI, JWT_SECRET)
-npm run dev    # starts on http://localhost:5000
-```
+- Base URL for all API calls: `https://dobby-assignment-qeyw.onrender.com/api`
+- Health check: `GET /api/health`
 
-### 2. Frontend
+> **Note:** The Render backend may take ~30 seconds to wake up on first request (free tier cold start).
 
-```bash
-cd frontend
-npm install
-npm run dev    # starts on http://localhost:5173
-```
+---
 
-Open **http://localhost:5173** in your browser.
+## Pages
+
+| Route | Page | Access |
+|-------|------|--------|
+| `/home` | Landing page | Public |
+| `/login` | Login page | Public (redirects to `/` if already logged in) |
+| `/signup` | Signup page | Public (redirects to `/` if already logged in) |
+| `/` | My Drive (root folders) | Protected |
+| `/folder/:id` | Folder view (sub-folders + images) | Protected |
 
 ---
 
 ## API Reference
 
-### Auth
-| Method | Path | Body | Description |
-|--------|------|------|-------------|
-| POST | `/api/auth/signup` | `{name, email, password}` | Register |
-| POST | `/api/auth/login` | `{email, password}` | Login → JWT |
-| GET | `/api/auth/me` | — | Current user |
+All protected routes require: `Authorization: Bearer <token>`
 
-### Folders (all require `Authorization: Bearer <token>`)
-| Method | Path | Body | Description |
-|--------|------|------|-------------|
-| GET | `/api/folders` | — | Root folders with sizes |
-| GET | `/api/folders/:id` | — | Folder + children + images + breadcrumb |
-| POST | `/api/folders` | `{name, parent?}` | Create folder |
-| DELETE | `/api/folders/:id` | — | Delete folder + all contents |
+### Auth
+
+| Method | Endpoint | Body | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/auth/signup` | `{name, email, password}` | Register a new user |
+| `POST` | `/api/auth/login` | `{email, password}` | Login → returns JWT |
+| `GET` | `/api/auth/me` | — | Get current user info |
+
+### Folders
+
+| Method | Endpoint | Body | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/folders` | — | List root folders with sizes |
+| `GET` | `/api/folders/:id` | — | Folder detail + children + images + breadcrumb |
+| `POST` | `/api/folders` | `{name, parent?}` | Create a folder (optionally nested) |
+| `DELETE` | `/api/folders/:id` | — | Delete folder + all contents recursively |
 
 ### Images
-| Method | Path | Body | Description |
-|--------|------|------|-------------|
-| POST | `/api/images` | `FormData{name, folder, image}` | Upload image |
-| DELETE | `/api/images/:id` | — | Delete image |
 
-Static files served at `/uploads/<filename>`.
+| Method | Endpoint | Body | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/images` | `FormData {name, folder, image}` | Upload image to Cloudinary |
+| `DELETE` | `/api/images/:id` | — | Delete image from Cloudinary + DB |
+
+---
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 18+
+- MongoDB (local or Atlas)
+- Cloudinary account
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/wellknown21st/dobby_assignment.git
+cd dobby_assignment
+```
+
+### 2. Backend setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Fill in your values in .env
+npm run dev
+# Runs on http://localhost:5000
+```
+
+**Backend `.env` variables:**
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/dobby-ads
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRES_IN=7d
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### 3. Frontend setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Runs on http://localhost:5173
+```
+
+Open **[http://localhost:5173/home](http://localhost:5173/home)** in your browser.
 
 ---
 
 ## MCP Server (Bonus — Claude Desktop Integration)
 
-The MCP server exposes backend actions as tools so Claude Desktop can control the app via natural language.
+The MCP server exposes backend actions as tools so Claude Desktop can manage your media via natural language.
 
 ### Setup
 
-1. Get your JWT token by logging in via the app (check browser localStorage → `token`).
+1. **Get your JWT token** — Log in to the app, open browser DevTools → Application → Local Storage → copy the `token` value.
 
-2. Add to Claude Desktop config (`claude_desktop_config.json`):
+2. **Add to Claude Desktop config** (`claude_desktop_config.json`):
 
 ```json
 {
   "mcpServers": {
     "dobby-ads": {
       "command": "node",
-      "args": ["C:\\path\\to\\dobby ads\\mcp-server\\index.js"],
+      "args": ["C:\\path\\to\\dobby_assignment\\mcp-server\\index.js"],
       "env": {
-        "DOBBY_API_URL": "http://localhost:5000/api",
-        "DOBBY_JWT_TOKEN": "your-jwt-token-here"
+        "DOBBY_API_URL": "https://dobby-assignment-qeyw.onrender.com/api",
+        "DOBBY_JWT_TOKEN": "paste-your-jwt-token-here"
       }
     }
   }
 }
 ```
 
-3. Restart Claude Desktop — it will connect to the MCP server.
+3. **Restart Claude Desktop** — it will connect to the MCP server automatically.
 
 ### Available MCP Tools
 
 | Tool | Description |
 |------|-------------|
-| `list_folders` | List root folders or sub-folders |
-| `create_folder` | Create a folder with optional parent |
-| `list_images` | List images inside a folder |
-| `get_folder_info` | Get folder details + total size |
-| `delete_folder` | Delete folder + all contents |
-| `delete_image` | Delete a specific image |
+| `list_folders` | List root folders or sub-folders of a given folder |
+| `create_folder` | Create a new folder with an optional parent |
+| `list_images` | List all images inside a specific folder |
+| `get_folder_info` | Get folder details including total recursive size |
+| `delete_folder` | Delete a folder and all its contents permanently |
+| `delete_image` | Delete a specific image by ID |
 
-### Example prompts for Claude
+### Example Claude Prompts
 
-- *"Create a folder called Campaigns"*
-- *"Create a folder called Summer inside Campaigns"*
-- *"List all my folders"*
-- *"What's the total size of the Projects folder?"*
+```
+"Create a folder called Campaigns"
+"Create a folder called Summer 2024 inside Campaigns"
+"List all my folders"
+"What is the total size of the Brand Assets folder?"
+"List all images in the Social Media folder"
+```
 
 ---
 
 ## Project Structure
 
 ```
-dobby-ads/
+dobby_assignment/
+├── .gitignore
+├── README.md
+│
 ├── backend/
-│   ├── src/
-│   │   ├── models/        User.js, Folder.js, Image.js
-│   │   ├── routes/        auth.js, folders.js, images.js
-│   │   ├── middleware/    auth.js (JWT protect)
-│   │   ├── utils/         upload.js (Multer), folderUtils.js
-│   │   └── index.js
-│   └── uploads/           (image files stored here)
+│   ├── .env.example              ← environment template
+│   ├── package.json
+│   └── src/
+│       ├── index.js              ← Express app entry point
+│       ├── models/
+│       │   ├── User.js           ← bcrypt password hashing
+│       │   ├── Folder.js         ← nested folder model
+│       │   └── Image.js          ← Cloudinary metadata model
+│       ├── routes/
+│       │   ├── auth.js           ← signup, login, /me
+│       │   ├── folders.js        ← CRUD + recursive size
+│       │   └── images.js         ← Cloudinary upload/delete
+│       ├── middleware/
+│       │   └── auth.js           ← JWT protect middleware
+│       └── utils/
+│           ├── upload.js         ← Cloudinary + multer config
+│           └── folderUtils.js    ← recursive size calculation
+│
 ├── frontend/
 │   └── src/
-│       ├── api/           axios.js
-│       ├── context/       AuthContext.jsx
-│       ├── components/    Navbar, FolderCard, ImageCard, Modals
-│       └── pages/         LoginPage, SignupPage, DashboardPage
+│       ├── api/
+│       │   └── axios.js          ← JWT interceptor
+│       ├── context/
+│       │   └── AuthContext.jsx   ← global auth state
+│       ├── components/
+│       │   ├── Navbar.jsx
+│       │   ├── FolderCard.jsx
+│       │   ├── ImageCard.jsx
+│       │   ├── CreateFolderModal.jsx
+│       │   └── UploadImageModal.jsx
+│       └── pages/
+│           ├── LandingPage.jsx   ← public marketing page
+│           ├── LoginPage.jsx
+│           ├── SignupPage.jsx
+│           └── DashboardPage.jsx ← drive (root + nested)
+│
 └── mcp-server/
-    └── index.js
+    └── index.js                  ← MCP tools for Claude Desktop
 ```
+
+---
+
+## Deployment
+
+### Frontend — Vercel
+- Framework: **Vite (React)**
+- Set environment variable: `VITE_API_URL=https://dobby-assignment-qeyw.onrender.com`
+
+### Backend — Render
+- Runtime: **Node.js**
+- Build command: `npm install`
+- Start command: `node src/index.js`
+- Set all `.env` variables in Render's environment settings
+
+---
+
+## Security Notes
+
+- Passwords are hashed with **bcrypt** (12 salt rounds)
+- JWT tokens expire in **7 days**
+- All folder/image queries are filtered by `owner` — no cross-user data leakage
+- Cloudinary credentials are never exposed to the client
+- `.env` is gitignored; use `.env.example` as a template
