@@ -39,7 +39,6 @@ function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
 
-  // 🔥 redirect logged-in users to dashboard
   return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
@@ -57,14 +56,12 @@ export default function App() {
               borderRadius: '10px',
               fontSize: '0.875rem',
             },
-            success: { iconTheme: { primary: '#2ecc71', secondary: '#fff' } },
-            error: { iconTheme: { primary: '#ff4d6d', secondary: '#fff' } },
           }}
         />
 
         <Routes>
 
-          {/* ✅ Landing Page as root */}
+          {/* Landing Page */}
           <Route path="/" element={<LandingPage />} />
 
           {/* Auth */}
@@ -77,7 +74,7 @@ export default function App() {
             element={<PublicRoute><SignupPage /></PublicRoute>}
           />
 
-          {/* ✅ Dashboard moved here */}
+          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
