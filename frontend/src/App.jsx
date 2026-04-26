@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
+import LandingPage from './pages/LandingPage';
 import { Layers } from 'lucide-react';
 import './index.css';
 import './App.css';
@@ -55,6 +56,8 @@ export default function App() {
           }}
         />
         <Routes>
+          {/* Public landing page */}
+          <Route path="/home" element={<LandingPage />} />
           <Route
             path="/login"
             element={<PublicRoute><LoginPage /></PublicRoute>}
@@ -63,6 +66,7 @@ export default function App() {
             path="/signup"
             element={<PublicRoute><SignupPage /></PublicRoute>}
           />
+          {/* Protected drive */}
           <Route
             path="/"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
@@ -71,7 +75,7 @@ export default function App() {
             path="/folder/:folderId"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
