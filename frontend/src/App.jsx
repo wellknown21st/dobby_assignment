@@ -11,6 +11,7 @@ import './App.css';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+
   if (loading) {
     return (
       <div className="loading-screen">
@@ -24,17 +25,22 @@ function ProtectedRoute({ children }) {
         }}>
           <Layers size={24} />
         </div>
-        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Loading…</div>
+        <div style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+          Loading…
+        </div>
       </div>
     );
   }
+
   return user ? children : <Navigate to="/login" replace />;
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user ? <Navigate to="/" replace /> : children;
+
+  // 🔥 redirect logged-in users to dashboard
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 export default function App() {
@@ -55,9 +61,13 @@ export default function App() {
             error: { iconTheme: { primary: '#ff4d6d', secondary: '#fff' } },
           }}
         />
+
         <Routes>
-          {/* Public landing page */}
-          <Route path="/home" element={<LandingPage />} />
+
+          {/* ✅ Landing Page as root */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Auth */}
           <Route
             path="/login"
             element={<PublicRoute><LoginPage /></PublicRoute>}
@@ -66,16 +76,21 @@ export default function App() {
             path="/signup"
             element={<PublicRoute><SignupPage /></PublicRoute>}
           />
-          {/* Protected drive */}
+
+          {/* ✅ Dashboard moved here */}
           <Route
-            path="/"
+            path="/dashboard"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
           />
+
           <Route
             path="/folder/:folderId"
             element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
           />
-          <Route path="*" element={<Navigate to="/home" replace />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
