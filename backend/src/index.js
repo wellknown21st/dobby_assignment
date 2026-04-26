@@ -10,12 +10,20 @@ const imageRoutes = require('./routes/images');
 
 const app = express();
 
+// ✅ CORS configuration (local + deployed frontend)
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://dobby-assignment.vercel.app'
+  ],
+  credentials: true
+}));
+
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded images statically
+// Serve uploaded images statically (⚠️ local only, not reliable in production)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
@@ -44,7 +52,7 @@ mongoose
   .then(() => {
     console.log('✅ Connected to MongoDB');
     app.listen(PORT, () => {
-      console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+      console.log(`🚀 Backend server running on port ${PORT}`);
     });
   })
   .catch((err) => {
