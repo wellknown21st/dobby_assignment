@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import {
   Layers, FolderOpen, Image, Shield, Zap, Users,
-  ArrowRight, ChevronRight, HardDrive, Lock, Sparkles
+  ArrowRight, ChevronRight, HardDrive, Lock, Sparkles, LogOut
 } from 'lucide-react';
 import './LandingPage.css';
 
@@ -53,7 +54,16 @@ const steps = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading, logout } = useAuth();
+
+  // Treat user as logged-in if we have a token even while auth is still verifying
+  const hasToken = !!localStorage.getItem('token');
+  const isLoggedIn = user || (!loading && hasToken) || (loading && hasToken);
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+  };
 
   return (
     <div className="landing">
@@ -69,10 +79,24 @@ export default function LandingPage() {
             <a href="#how">How it works</a>
           </div>
           <div className="landing-nav-cta">
-            {user ? (
-              <button className="btn btn-primary" onClick={() => navigate('/')}>
-                Go to Drive <ArrowRight size={15} />
-              </button>
+            {isLoggedIn ? (
+              <>
+                <button
+                  id="nav-go-drive"
+                  className="btn btn-secondary"
+                  onClick={() => navigate('/')}
+                >
+                  Open My Drive <ArrowRight size={15} />
+                </button>
+                <button
+                  id="nav-logout"
+                  className="btn btn-ghost"
+                  onClick={handleLogout}
+                  style={{ gap: 6, display: 'flex', alignItems: 'center' }}
+                >
+                  <LogOut size={15} /> Logout
+                </button>
+              </>
             ) : (
               <>
                 <button className="btn btn-ghost" onClick={() => navigate('/login')} id="nav-login">
@@ -107,7 +131,7 @@ export default function LandingPage() {
         </p>
 
         <div className="hero-actions">
-          {user ? (
+          {isLoggedIn ? (
             <button className="btn btn-primary hero-btn" onClick={() => navigate('/')} id="hero-go-drive">
               Open My Drive <ArrowRight size={17} />
             </button>
@@ -231,14 +255,13 @@ export default function LandingPage() {
         <Lock size={32} style={{ color: 'var(--color-primary)', opacity: 0.6 }} />
         <h2 className="cta-title">Your media. Private. Organised.</h2>
         <p className="cta-sub">Create an account and start uploading in under a minute.</p>
-        {!user && (
-          <button className="btn btn-primary hero-btn" onClick={() => navigate('/signup')} id="cta-signup">
-            Get started free <ArrowRight size={17} />
-          </button>
-        )}
-        {user && (
+        {isLoggedIn ? (
           <button className="btn btn-primary hero-btn" onClick={() => navigate('/')} id="cta-drive">
             Open My Drive <ArrowRight size={17} />
+          </button>
+        ) : (
+          <button className="btn btn-primary hero-btn" onClick={() => navigate('/signup')} id="cta-signup">
+            Get started free <ArrowRight size={17} />
           </button>
         )}
       </section>
