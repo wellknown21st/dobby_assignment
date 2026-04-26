@@ -8,13 +8,12 @@ const imageSchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, 'Image name cannot exceed 200 characters'],
     },
-    filename: {
+    url: {
       type: String,
       required: true,
     },
-    mimetype: {
+    public_id: {
       type: String,
-      required: true,
     },
     size: {
       type: Number,
